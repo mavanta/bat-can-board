@@ -1,0 +1,144 @@
+local player = game:GetService("Players").LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "BatCanHub"
+
+-- Nút mở/tắt hub
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 45, 0, 45)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -22)
+toggleButton.Text = "BCB"
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(1, 0)
+uiCorner.Parent = toggleButton
+toggleButton.TextSize = 16
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.Parent = gui
+toggleButton.BorderSizePixel = 0
+toggleButton.ZIndex = 2
+toggleButton.AutoButtonColor = true
+toggleButton.ClipsDescendants = true
+toggleButton.AnchorPoint = Vector2.new(0, 0)
+toggleButton.Draggable = true
+
+-- Khung hub chính
+local hubFrame = Instance.new("Frame")
+hubFrame.Size = UDim2.new(0, 250, 0, 250)
+hubFrame.Position = UDim2.new(0.5, -125, 0.5, -110)
+hubFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+hubFrame.Visible = false
+hubFrame.Active = true
+hubFrame.Draggable = true
+hubFrame.Parent = gui
+
+local function createButton(name, text, positionY)
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Position = UDim2.new(0, 0, 0, 0)
+	title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	title.Text = "🔥 Bát Can Board V1 🔥"
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.Font = Enum.Font.SourceSansBold
+	title.TextSize = 18
+	title.Parent = hubFrame
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Size = UDim2.new(0.8, 0, 0, 40)
+	btn.Position = UDim2.new(0.1, 0, 0, positionY)
+	btn.Text = text
+	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.SourceSans
+	btn.TextSize = 16
+	btn.Parent = hubFrame
+	return btn
+end
+
+-- Các nút
+local setBtn = createButton("SetPart", "Đặt Vị Trí", 40)
+local tpBtn = createButton("TPPart", "Tele Đến Vị Trí", 90)
+local noclipBtn = createButton("Noclip", "❌Noclip Off", 140)
+local invisBtn = createButton("Invisible", "❌Invisible Off", 190)
+
+-- Toggle hiện/ẩn hub
+toggleButton.MouseButton1Click:Connect(function()
+	hubFrame.Visible = not hubFrame.Visible
+end)
+
+-- ===== CHỨC NĂNG =====
+
+local savedPart = nil
+local noclip = false
+local connection
+local invisible = false
+
+-- Set Part
+setBtn.MouseButton1Click:Connect(function()
+	if savedPart then
+		savedPart:Destroy()
+	end
+	local char = player.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local marker = Instance.new("Part")
+		marker.Size = Vector3.new(4, 1, 4)
+		marker.Position = char.HumanoidRootPart.Position + Vector3.new(0, 1, 0)
+		marker.Anchored = true
+		marker.CanCollide = false
+		marker.Transparency = 0.5
+		marker.Color = Color3.fromRGB(255, 255, 0)
+		marker.Name = "TeleportMarker"
+		marker.Parent = workspace
+		savedPart = marker
+	end
+end)
+
+-- Teleport
+tpBtn.MouseButton1Click:Connect(function()
+	if savedPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		player.Character.HumanoidRootPart.CFrame = CFrame.new(savedPart.Position + Vector3.new(0, 3, 0))
+	end
+end)
+
+-- Noclip
+noclipBtn.MouseButton1Click:Connect(function()
+	noclip = not noclip
+	if noclip then
+		connection = game:GetService("RunService").Stepped:Connect(function()
+			for _, part in pairs(player.Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+		end)
+		noclipBtn.Text = "✅Noclip ON"
+	else
+		if connection then connection:Disconnect() end
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+			end
+		end
+		noclipBtn.Text = "❌Noclip Off"
+	end
+end)
+
+-- Invisibility
+invisBtn.MouseButton1Click:Connect(function()
+	invisible = not invisible
+	for _, part in pairs(player.Character:GetDescendants()) do
+		if part:IsA("BasePart") or part:IsA("Decal") then
+			if part.Name ~= "HumanoidRootPart" then
+				part.Transparency = invisible and 1 or 0
+			end
+		elseif part:IsA("ParticleEmitter") or part:IsA("Trail") then
+			part.Enabled = not invisible
+		end
+	end
+	local hum = player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.NameDisplayDistance = invisible and 0 or 100
+		hum.HealthDisplayDistance = invisible and 0 or 100
+	end
+	invisBtn.Text = invisible and "✅ Invisible ON" or "❌Invisible Off"
+end)
