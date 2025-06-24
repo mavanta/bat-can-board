@@ -26,7 +26,9 @@ toggleButton.Draggable = true
 
 -- Khung hub chính
 local hubFrame = Instance.new("Frame")
-hubFrame.Size = UDim2.new(0, 250, 0, 250)
+
+hubFrame.Size = UDim2.new(0, 230, 0, 370) -- Size Khung hub
+
 hubFrame.Position = UDim2.new(0.5, -125, 0.5, -110)
 hubFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 hubFrame.Visible = false
@@ -34,12 +36,22 @@ hubFrame.Active = true
 hubFrame.Draggable = true
 hubFrame.Parent = gui
 
+local updateLabel = Instance.new("TextLabel")
+updateLabel.Size = UDim2.new(1, 0, 0, 20)
+updateLabel.Position = UDim2.new(0, 0, 0, 279)
+updateLabel.BackgroundTransparency = 1
+updateLabel.Text = "Update V2 Soon 🔥"
+updateLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+updateLabel.Font = Enum.Font.SourceSansBold
+updateLabel.TextSize = 14
+updateLabel.Parent = hubFrame
+
 local function createButton(name, text, positionY)
 	local title = Instance.new("TextLabel")
 	title.Size = UDim2.new(1, 0, 0, 30)
 	title.Position = UDim2.new(0, 0, 0, 0)
 	title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-	title.Text = "🔥 Bát Can Board V1 🔥"
+	title.Text = "🔥 Bát Can Board V1.1 🔥"
 	title.TextColor3 = Color3.new(1, 1, 1)
 	title.Font = Enum.Font.SourceSansBold
 	title.TextSize = 18
@@ -61,6 +73,7 @@ end
 local setBtn = createButton("SetPart", "Đặt Vị Trí", 40)
 local tpBtn = createButton("TPPart", "Tele Đến Vị Trí", 90)
 local noclipBtn = createButton("Noclip", "❌Noclip Off", 140)
+local espBtn = createButton("ESP", "❌ESP Off", 240)
 -- Ô nhập speed
 local speedBox = Instance.new("TextBox")
 speedBox.Size = UDim2.new(0.5, -5, 0, 35)
@@ -84,6 +97,32 @@ applyBtn.Font = Enum.Font.SourceSansBold
 applyBtn.TextSize = 16
 applyBtn.Parent = hubFrame
 
+
+-- Nút Copy Discord
+local copyBtn = Instance.new("TextButton")
+copyBtn.Size = UDim2.new(0.6, 0, 0, 30)
+copyBtn.Position = UDim2.new(0.2, 0, 0, 300)
+copyBtn.Text = "Copy Discord"
+copyBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 255)
+copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyBtn.Font = Enum.Font.SourceSansBold
+copyBtn.TextSize = 14
+copyBtn.Parent = hubFrame
+
+-- TextBox hiển thị link
+local discordBox = Instance.new("TextBox")
+discordBox.Size = UDim2.new(0.9, 0, 0, 25)
+discordBox.Position = UDim2.new(0.05, 0, 0, 330)
+discordBox.Text = "https://discord.gg/592AGgZHm7"
+discordBox.TextEditable = false
+discordBox.ClearTextOnFocus = false
+discordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+discordBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+discordBox.Font = Enum.Font.SourceSans
+discordBox.TextSize = 14
+discordBox.TextWrapped = true
+discordBox.Parent = hubFrame
+
 -- Toggle hiện/ẩn hub
 toggleButton.MouseButton1Click:Connect(function()
 	hubFrame.Visible = not hubFrame.Visible
@@ -94,6 +133,7 @@ end)
 local savedPart = nil
 local noclip = false
 local connection
+local espEnabled = true
 
 -- Set Part
 setBtn.MouseButton1Click:Connect(function()
@@ -144,6 +184,42 @@ noclipBtn.MouseButton1Click:Connect(function()
 		noclipBtn.Text = "❌Noclip Off"
 	end
 end)
+
+ -- ESP --
+function createESPForPlayer(targetPlayer)
+	local char = targetPlayer.Character
+	if not char then return end
+
+	-- Highlight
+	if not char:FindFirstChild("ESPHighlight") then
+		local hl = Instance.new("Highlight")
+		hl.Name = "ESPHighlight"
+		hl.FillColor = Color3.new(1, 1, 1)
+		hl.OutlineTransparency = 1
+		hl.Parent = char
+	end
+
+	-- Billboard name
+	if not char:FindFirstChild("ESPBillboard") then
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "ESPBillboard"
+		billboard.Size = UDim2.new(0, 100, 0, 20)
+		billboard.StudsOffset = Vector3.new(0, 3, 0)
+		billboard.Adornee = char:FindFirstChild("Head")
+		billboard.AlwaysOnTop = true
+		billboard.Parent = char
+
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Text = targetPlayer.Name
+		label.TextColor3 = Color3.new(1, 1, 1)
+		label.TextStrokeTransparency = 0
+		label.TextScaled = true
+		label.Font = Enum.Font.SourceSansBold
+		label.Parent = billboard
+	end
+end
 -- Apply Speed
 applyBtn.MouseButton1Click:Connect(function()
 	local value = tonumber(speedBox.Text)
@@ -152,14 +228,80 @@ applyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-player.CharacterAdded:Connect(function()
-player.Character:WaitForChild("Humanoid").WalkSpeed = 16
+espBtn.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	if espEnabled then
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character then
+				createESPForPlayer(plr)
+			end
+		end
+		espBtn.Text = "✅ESP ON"
+	else
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character then
+				local esp1 = plr.Character:FindFirstChild("ESPHighlight")
+				local esp2 = plr.Character:FindFirstChild("ESPBillboard")
+				if esp1 then esp1:Destroy() end
+				if esp2 then esp2:Destroy() end
+			end
+		end
+		espBtn.Text = "❌ESP Off"
+	end
+end)
+player.CharacterAdded:Connect(function(char)
+	-- Reset Speed
+	char:WaitForChild("Humanoid").WalkSpeed = 16
+
+	-- Xoá part teleport nếu còn
 	if savedPart and savedPart.Parent then
 		savedPart:Destroy()
 		savedPart = nil
 	end
+
 	-- Reset noclip
 	noclip = false
 	if connection then connection:Disconnect() end
 	noclipBtn.Text = "❌Noclip Off"
+
+	-- Xoá toàn bộ ESP hiện tại (kể cả của chính mình)
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr.Character then
+			local esp1 = plr.Character:FindFirstChild("ESPHighlight")
+			local esp2 = plr.Character:FindFirstChild("ESPBillboard")
+			if esp1 then esp1:Destroy() end
+			if esp2 then esp2:Destroy() end
+		end
+	end
+
+	-- Nếu ESP đang bật thì tạo lại cho tất cả
+	if espEnabled then
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character then
+				createESPForPlayer(plr)
+			end
+		end
+	end
+end)
+game.Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function()
+		wait(1)
+		if espEnabled then
+			createESPForPlayer(plr)
+		end
+	end)
+end)
+copyBtn.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard("https://discord.gg/592AGgZHm7")
+		copyBtn.Text = "Copied!"
+		task.delay(2, function()
+			copyBtn.Text = "Copy Discord"
+		end)
+	else
+		copyBtn.Text = "Manual Copy ↓"
+		task.delay(2, function()
+			copyBtn.Text = "Copy Discord"
+		end)
+	end
 end)
