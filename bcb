@@ -277,14 +277,7 @@ espBtn.MouseButton1Click:Connect(function()
 	end
 end)
 player.CharacterAdded:Connect(function(char)
-
 	char:WaitForChild("Humanoid").WalkSpeed = 16
-
-	if savedPart and savedPart.Parent then
-		savedPart:Destroy()
-		savedPart = nil
-	end
-
 	noclip = false
 
 	if connection then connection:Disconnect() end
