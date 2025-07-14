@@ -2,6 +2,7 @@ local player = game:GetService("Players").LocalPlayer
 local oldGUI = player:FindFirstChild("PlayerGui"):FindFirstChild("BatCanHub")
 if oldGUI then oldGUI:Destroy() end
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.ResetOnSpawn = false
 gui.Name = "BatCanHub"
 
 -- Nút mở/tắt hub
@@ -26,8 +27,16 @@ toggleButton.Draggable = true
 
 -- Khung hub chính
 local hubFrame = Instance.new("Frame")
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, 0, 1, -80)
+scrollFrame.Position = UDim2.new(0, 0, 0, 30)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600) -- update nhieu nut = size to
+scrollFrame.ScrollBarThickness = 8
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.Parent = hubFrame
 
-hubFrame.Size = UDim2.new(0, 230, 0, 370) -- Size Khung hub
+hubFrame.Size = UDim2.new(0, 230, 0, 395) -- Size Khung hub
 
 hubFrame.Position = UDim2.new(0.5, -125, 0.5, -110)
 hubFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -36,26 +45,8 @@ hubFrame.Active = true
 hubFrame.Draggable = true
 hubFrame.Parent = gui
 
-local updateLabel = Instance.new("TextLabel")
-updateLabel.Size = UDim2.new(1, 0, 0, 20)
-updateLabel.Position = UDim2.new(0, 0, 0, 279)
-updateLabel.BackgroundTransparency = 1
-updateLabel.Text = "Update V2 Soon 🔥"
-updateLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-updateLabel.Font = Enum.Font.SourceSansBold
-updateLabel.TextSize = 14
-updateLabel.Parent = hubFrame
 
 local function createButton(name, text, positionY)
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 0, 30)
-	title.Position = UDim2.new(0, 0, 0, 0)
-	title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-	title.Text = "🔥 Bát Can Board V1.1 🔥"
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 18
-	title.Parent = hubFrame
 	local btn = Instance.new("TextButton")
 	btn.Name = name
 	btn.Size = UDim2.new(0.8, 0, 0, 40)
@@ -65,16 +56,36 @@ local function createButton(name, text, positionY)
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	btn.Font = Enum.Font.SourceSans
 	btn.TextSize = 16
-	btn.Parent = hubFrame
+	btn.Parent = scrollFrame
 	return btn
 end
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+title.Text = "🔥 Bát Can Board V1.5 🔥"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.Parent = hubFrame
 
--- Các nút
-local setBtn = createButton("SetPart", "Đặt Vị Trí", 40)
-local tpBtn = createButton("TPPart", "Tele Đến Vị Trí", 90)
+local updateLabel = Instance.new("TextLabel")
+updateLabel.Size = UDim2.new(1, 0, 0, 20)
+updateLabel.Position = UDim2.new(0, 0, 0, 310)
+updateLabel.BackgroundTransparency = 1
+updateLabel.Text = "Update V2 Soon 🔥"
+updateLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+updateLabel.Font = Enum.Font.SourceSansBold
+updateLabel.TextSize = 14
+updateLabel.Parent = hubFrame
+
+-- All button 
+local setBtn = createButton("SetPart", "Set Checkpoint", 40)
+local tpBtn = createButton("TPPart", "Tp to checkpoint", 90)
 local noclipBtn = createButton("Noclip", "❌Noclip Off", 140)
 local espBtn = createButton("ESP", "❌ESP Off", 240)
--- Ô nhập speed
+local godBtn = createButton("GodMode", "❌God Mode Off (ban warning)", 290)
+
 local speedBox = Instance.new("TextBox")
 speedBox.Size = UDim2.new(0.5, -5, 0, 35)
 speedBox.Position = UDim2.new(0.1, 0, 0, 190)
@@ -85,7 +96,8 @@ speedBox.TextColor3 = Color3.fromRGB(0, 0, 0)
 speedBox.Font = Enum.Font.SourceSans
 speedBox.TextSize = 16
 speedBox.ClearTextOnFocus = false
-speedBox.Parent = hubFrame
+speedBox.Parent = scrollFrame
+
 
 local applyBtn = Instance.new("TextButton")
 applyBtn.Size = UDim2.new(0.3, 0, 0, 35)
@@ -95,13 +107,11 @@ applyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 applyBtn.Font = Enum.Font.SourceSansBold
 applyBtn.TextSize = 16
-applyBtn.Parent = hubFrame
+applyBtn.Parent = scrollFrame
 
-
--- Nút Copy Discord
 local copyBtn = Instance.new("TextButton")
 copyBtn.Size = UDim2.new(0.6, 0, 0, 30)
-copyBtn.Position = UDim2.new(0.2, 0, 0, 300)
+copyBtn.Position = UDim2.new(0.2, 0, 0, 340)
 copyBtn.Text = "Copy Discord"
 copyBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 255)
 copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -109,10 +119,10 @@ copyBtn.Font = Enum.Font.SourceSansBold
 copyBtn.TextSize = 14
 copyBtn.Parent = hubFrame
 
--- TextBox hiển thị link
+-- link discord box --
 local discordBox = Instance.new("TextBox")
 discordBox.Size = UDim2.new(0.9, 0, 0, 25)
-discordBox.Position = UDim2.new(0.05, 0, 0, 330)
+discordBox.Position = UDim2.new(0.05, 0, 0, 370)
 discordBox.Text = "https://discord.gg/592AGgZHm7"
 discordBox.TextEditable = false
 discordBox.ClearTextOnFocus = false
@@ -123,17 +133,18 @@ discordBox.TextSize = 14
 discordBox.TextWrapped = true
 discordBox.Parent = hubFrame
 
--- Toggle hiện/ẩn hub
+-- Bat/ tat 
 toggleButton.MouseButton1Click:Connect(function()
 	hubFrame.Visible = not hubFrame.Visible
 end)
 
--- ===== CHỨC NĂNG =====
+-- thuoc tinh --
 
 local savedPart = nil
 local noclip = false
 local connection
 local espEnabled = true
+local godMode = false
 
 -- Set Part
 setBtn.MouseButton1Click:Connect(function()
@@ -152,6 +163,24 @@ setBtn.MouseButton1Click:Connect(function()
 		marker.Name = "TeleportMarker"
 		marker.Parent = workspace
 		savedPart = marker
+	end
+end)
+
+godBtn.MouseButton1Click:Connect(function()
+	godMode = not godMode
+	local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+	if godMode then
+		if humanoid then
+			humanoid.MaxHealth = 100000
+			humanoid.Health = 100000
+		end
+		godBtn.Text = "✅God Mode ON (ban warning)"
+	else
+		if humanoid then
+			humanoid.MaxHealth = 100
+			humanoid.Health = 100
+		end
+		godBtn.Text = "❌God Mode Off (ban warning)"
 	end
 end)
 
@@ -185,12 +214,11 @@ noclipBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
- -- ESP --
+-- ESP --
 function createESPForPlayer(targetPlayer)
 	local char = targetPlayer.Character
 	if not char then return end
 
-	-- Highlight
 	if not char:FindFirstChild("ESPHighlight") then
 		local hl = Instance.new("Highlight")
 		hl.Name = "ESPHighlight"
@@ -199,7 +227,6 @@ function createESPForPlayer(targetPlayer)
 		hl.Parent = char
 	end
 
-	-- Billboard name
 	if not char:FindFirstChild("ESPBillboard") then
 		local billboard = Instance.new("BillboardGui")
 		billboard.Name = "ESPBillboard"
@@ -250,21 +277,19 @@ espBtn.MouseButton1Click:Connect(function()
 	end
 end)
 player.CharacterAdded:Connect(function(char)
-	-- Reset Speed
+
 	char:WaitForChild("Humanoid").WalkSpeed = 16
 
-	-- Xoá part teleport nếu còn
 	if savedPart and savedPart.Parent then
 		savedPart:Destroy()
 		savedPart = nil
 	end
 
-	-- Reset noclip
 	noclip = false
+
 	if connection then connection:Disconnect() end
 	noclipBtn.Text = "❌Noclip Off"
 
-	-- Xoá toàn bộ ESP hiện tại (kể cả của chính mình)
 	for _, plr in pairs(game.Players:GetPlayers()) do
 		if plr.Character then
 			local esp1 = plr.Character:FindFirstChild("ESPHighlight")
@@ -274,7 +299,6 @@ player.CharacterAdded:Connect(function(char)
 		end
 	end
 
-	-- Nếu ESP đang bật thì tạo lại cho tất cả
 	if espEnabled then
 		for _, plr in pairs(game.Players:GetPlayers()) do
 			if plr.Character then
@@ -299,7 +323,7 @@ copyBtn.MouseButton1Click:Connect(function()
 			copyBtn.Text = "Copy Discord"
 		end)
 	else
-		copyBtn.Text = "Manual Copy ↓"
+		copyBtn.Text = "Copied"
 		task.delay(2, function()
 			copyBtn.Text = "Copy Discord"
 		end)
