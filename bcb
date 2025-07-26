@@ -1,4 +1,8 @@
-local player = game:GetService("Players").LocalPlayer
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local uis = game:GetService("UserInputService")
+local CAS = game:GetService("ContextActionService")
+local rs = game:GetService("RunService")
 local oldGUI = player:FindFirstChild("PlayerGui"):FindFirstChild("BatCanHub")
 if oldGUI then oldGUI:Destroy() end
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
@@ -45,7 +49,6 @@ hubFrame.Active = true
 hubFrame.Draggable = true
 hubFrame.Parent = gui
 
-
 local function createButton(name, text, positionY)
 	local btn = Instance.new("TextButton")
 	btn.Name = name
@@ -63,23 +66,71 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-title.Text = "🔥 Bát Can Board V1.5 🔥"
+title.Text = "🔥 Bát Can Board V2 Beta 🔥"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 18
 title.Parent = hubFrame
 
-
 -- All button 
 local setBtn = createButton("SetPart", "Set Checkpoint", 40)
 local tpBtn = createButton("TPPart", "Tp to checkpoint", 90)
-local noclipBtn = createButton("Noclip", "❌Noclip Off", 140)
-local espBtn = createButton("ESP", "❌ESP Off", 240)
+local noclipBtn = createButton("Noclip", "❌Noclip", 140)
+-- nút chỉnh speed ở dongf 129 --
+local espBtn = createButton("ESP", "✅ESP", 240)
+local flyBtn = createButton("Fly", "Fly", 290)
+local infJumpBtn = createButton("InfJump", "❌Infinity Jump", 340)
+
+ --[FLY 3 BUTTON CREATE] --
+ --[[[[]]
+
+local flyContainer = Instance.new("Frame")
+flyContainer.Size = UDim2.new(0.8, 0, 0, 40)
+flyContainer.Position = UDim2.new(0.1, 0, 0, 290)
+flyContainer.BackgroundTransparency = 1
+flyContainer.Parent = scrollFrame
+
+local layout = Instance.new("UIListLayout")
+layout.FillDirection = Enum.FillDirection.Horizontal
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = flyContainer
+
+-- SpeedFly - 1 button
+local leftBtn = Instance.new("TextButton")
+leftBtn.Size = UDim2.new(0, 40, 0, 40)
+leftBtn.Text = "-"
+leftBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+leftBtn.TextColor3 = Color3.new(1, 1, 1)
+leftBtn.Font = Enum.Font.SourceSansBold
+leftBtn.TextSize = 14
+leftBtn.Parent = flyContainer
+
+-- Fly button
+flyBtn.Size = UDim2.new(1, -90, 0, 40)
+flyBtn.Text = "Fly"
+flyBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+flyBtn.TextColor3 = Color3.new(1, 1, 1)
+flyBtn.Font = Enum.Font.SourceSansBold
+flyBtn.TextSize = 16
+flyBtn.Parent = flyContainer
+
+-- SpeedFly + 1 button
+local rightBtn = Instance.new("TextButton")
+rightBtn.Size = UDim2.new(0, 40, 0, 40)
+rightBtn.Text = "+"
+rightBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+rightBtn.TextColor3 = Color3.new(1, 1, 1)
+rightBtn.Font = Enum.Font.SourceSansBold
+rightBtn.TextSize = 14
+rightBtn.Parent = flyContainer
+
+-- [END CREATE FLY BUTTON]
 
 local speedBox = Instance.new("TextBox")
 speedBox.Size = UDim2.new(0.5, -5, 0, 35)
 speedBox.Position = UDim2.new(0.1, 0, 0, 190)
-speedBox.PlaceholderText = "Speed..."
+speedBox.PlaceholderText = "Enter Speed..."
 speedBox.Text = ""
 speedBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 speedBox.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -88,11 +139,10 @@ speedBox.TextSize = 16
 speedBox.ClearTextOnFocus = false
 speedBox.Parent = scrollFrame
 
-
 local applyBtn = Instance.new("TextButton")
 applyBtn.Size = UDim2.new(0.3, 0, 0, 35)
 applyBtn.Position = UDim2.new(0.6, 5, 0, 190)
-applyBtn.Text = "Apply"
+applyBtn.Text = "Apply Speed"
 applyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 applyBtn.Font = Enum.Font.SourceSansBold
@@ -134,6 +184,8 @@ local savedPart = nil
 local noclip = false
 local connection
 local espEnabled = true
+local infJumpEnabled = false
+local infJumpConnection
 
 -- Set Part
 setBtn.MouseButton1Click:Connect(function()
@@ -155,7 +207,6 @@ setBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-
 -- Teleport
 tpBtn.MouseButton1Click:Connect(function()
 	if savedPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -174,7 +225,7 @@ noclipBtn.MouseButton1Click:Connect(function()
 				end
 			end
 		end)
-		noclipBtn.Text = "✅Noclip ON"
+		noclipBtn.Text = "✅Noclip"
 	else
 		if connection then connection:Disconnect() end
 		for _, part in pairs(player.Character:GetDescendants()) do
@@ -182,11 +233,11 @@ noclipBtn.MouseButton1Click:Connect(function()
 				part.CanCollide = true
 			end
 		end
-		noclipBtn.Text = "❌Noclip Off"
+		noclipBtn.Text = "❌Noclip"
 	end
 end)
 
--- ESP --
+-- ESP add --
 function createESPForPlayer(targetPlayer)
 	local char = targetPlayer.Character
 	if not char then return end
@@ -219,6 +270,7 @@ function createESPForPlayer(targetPlayer)
 		label.Parent = billboard
 	end
 end
+
 -- Apply Speed
 applyBtn.MouseButton1Click:Connect(function()
 	local value = tonumber(speedBox.Text)
@@ -227,6 +279,7 @@ applyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Esp --
 espBtn.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
 	if espEnabled then
@@ -235,7 +288,7 @@ espBtn.MouseButton1Click:Connect(function()
 				createESPForPlayer(plr)
 			end
 		end
-		espBtn.Text = "✅ESP ON"
+		espBtn.Text = "✅ESP"
 	else
 		for _, plr in pairs(game.Players:GetPlayers()) do
 			if plr.Character then
@@ -245,16 +298,296 @@ espBtn.MouseButton1Click:Connect(function()
 				if esp2 then esp2:Destroy() end
 			end
 		end
-		espBtn.Text = "❌ESP Off"
+		espBtn.Text = "❌ESP"
 	end
 end)
+
+-- fly varriables
+local speaker = game:GetService("Players").LocalPlayer
+flylol = true
+speedfly = 1
+
+-- FLY --
+flyBtn.MouseButton1Down:Connect(function()
+
+	if flylol == true then
+		flylol = false
+
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
+		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+	else 
+		flylol = true
+
+
+
+		for i = 1, speedfly do
+			spawn(function()
+
+				local hb = game:GetService("RunService").Heartbeat	
+
+
+				tpwalking = true
+				local chr = game.Players.LocalPlayer.Character
+				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+					if hum.MoveDirection.Magnitude > 0 then
+						chr:TranslateBy(hum.MoveDirection)
+					end
+				end
+
+			end)
+		end
+		game.Players.LocalPlayer.Character.Animate.Disabled = true
+		local Char = game.Players.LocalPlayer.Character
+		local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
+
+		for i,v in next, Hum:GetPlayingAnimationTracks() do
+			v:AdjustSpeed(0)
+		end
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
+		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
+		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+	end
+
+
+
+
+	if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+
+
+
+		local plr = game.Players.LocalPlayer
+		local torso = plr.Character.Torso
+		local flying = true
+		local deb = true
+		local ctrl = {f = 0, b = 0, l = 0, r = 0}
+		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		local maxspeed = 50
+		local speed = 0
+
+
+		local bg = Instance.new("BodyGyro", torso)
+		bg.P = 9e4
+		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.cframe = torso.CFrame
+		local bv = Instance.new("BodyVelocity", torso)
+		bv.velocity = Vector3.new(0,0.1,0)
+		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		if flylol == true then
+			plr.Character.Humanoid.PlatformStand = true
+		end
+		while flylol == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+			game:GetService("RunService").RenderStepped:Wait()
+
+			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+				speed = speed+.5+(speed/maxspeed)
+				if speed > maxspeed then
+					speed = maxspeed
+				end
+			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+				speed = speed-1
+				if speed < 0 then
+					speed = 0
+				end
+			end
+			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+			else
+				bv.velocity = Vector3.new(0,0,0)
+			end
+			--	game.Players.LocalPlayer.Character.Animate.Disabled = true
+			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+		end
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		speed = 0
+		bg:Destroy()
+		bv:Destroy()
+		plr.Character.Humanoid.PlatformStand = false
+		game.Players.LocalPlayer.Character.Animate.Disabled = false
+		tpwalking = false
+
+
+
+
+	else
+		local plr = game.Players.LocalPlayer
+		local UpperTorso = plr.Character.UpperTorso
+		local flying = true
+		local deb = true
+		local ctrl = {f = 0, b = 0, l = 0, r = 0}
+		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		local maxspeed = 50
+		local speed = 0
+
+
+		local bg = Instance.new("BodyGyro", UpperTorso)
+		bg.P = 9e4
+		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.cframe = UpperTorso.CFrame
+		local bv = Instance.new("BodyVelocity", UpperTorso)
+		bv.velocity = Vector3.new(0,0.1,0)
+		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		if flylol == true then
+			plr.Character.Humanoid.PlatformStand = true
+		end
+		while flylol == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+			wait()
+
+			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+				speed = speed+.5+(speed/maxspeed)
+				if speed > maxspeed then
+					speed = maxspeed
+				end
+			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+				speed = speed-1
+				if speed < 0 then
+					speed = 0
+				end
+			end
+			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+			else
+				bv.velocity = Vector3.new(0,0,0)
+			end
+
+			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+		end
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		lastctrl = {f = 0, b = 0, l = 0, r = 0}
+		speed = 0
+		bg:Destroy()
+		bv:Destroy()
+		plr.Character.Humanoid.PlatformStand = false
+		game.Players.LocalPlayer.Character.Animate.Disabled = false
+		tpwalking = false
+
+
+
+	end
+
+end)
+
+-- add + 1 speed fly
+rightBtn.MouseButton1Down:connect(function()
+	speedfly = speedfly + 1
+	if flylol == true then
+
+
+		tpwalking = false
+		for i = 1, speedfly do
+			spawn(function()
+
+				local hb = game:GetService("RunService").Heartbeat	
+
+
+				tpwalking = true
+				local chr = game.Players.LocalPlayer.Character
+				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+					if hum.MoveDirection.Magnitude > 0 then
+						chr:TranslateBy(hum.MoveDirection)
+					end
+				end
+
+			end)
+		end
+	end
+end)
+
+-- remove - 1 speed fly
+leftBtn.MouseButton1Down:connect(function()
+     if speedfly == 1 then
+	    speedfly = 1
+      else
+       speedfly = speedfly - 1
+		if flylol == true then
+			tpwalking = false
+		     for i = 1, speedfly do
+				spawn(function()
+
+					local hb = game:GetService("RunService").Heartbeat	
+
+
+					tpwalking = true
+					local chr = game.Players.LocalPlayer.Character
+					local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+					while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+						if hum.MoveDirection.Magnitude > 0 then
+							chr:TranslateBy(hum.MoveDirection)
+						end
+					end
+
+				end)
+			end
+		end
+     end
+end)
+
+-- inf jump
+infJumpBtn.MouseButton1Click:Connect(function()
+	infJumpEnabled = not infJumpEnabled
+
+	if infJumpEnabled then
+		infJumpBtn.Text = "✅Infinity Jump "
+		infJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+			local char = player.Character
+			if char and char:FindFirstChild("Humanoid") then
+				char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end)
+	else
+		infJumpBtn.Text = "❌Infinity Jump"
+		if infJumpConnection then
+			infJumpConnection:Disconnect()
+		end
+	end
+end)
+
+
+-- Dead Reset CHâracter
 player.CharacterAdded:Connect(function(char)
+    -- noclip dead event
 	char:WaitForChild("Humanoid").WalkSpeed = 16
 	noclip = false
 
 	if connection then connection:Disconnect() end
-	noclipBtn.Text = "❌Noclip Off"
+	noclipBtn.Text = "❌Noclip"
 
+    -- esp dead event
 	for _, plr in pairs(game.Players:GetPlayers()) do
 		if plr.Character then
 			local esp1 = plr.Character:FindFirstChild("ESPHighlight")
@@ -263,6 +596,13 @@ player.CharacterAdded:Connect(function(char)
 			if esp2 then esp2:Destroy() end
 		end
 	end
+    -- inf jump dead event
+	infJumpEnabled = false
+	infJumpBtn.Text = "❌Infinity Jump"
+	if infJumpConnection then
+		infJumpConnection:Disconnect()
+	end
+
 
 	if espEnabled then
 		for _, plr in pairs(game.Players:GetPlayers()) do
@@ -272,14 +612,16 @@ player.CharacterAdded:Connect(function(char)
 		end
 	end
 end)
+
 game.Players.PlayerAdded:Connect(function(plr)
 	plr.CharacterAdded:Connect(function()
-		wait(1)
+		task.wait(1)
 		if espEnabled then
 			createESPForPlayer(plr)
 		end
 	end)
 end)
+
 copyBtn.MouseButton1Click:Connect(function()
 	if setclipboard then
 		setclipboard("https://discord.gg/592AGgZHm7")
