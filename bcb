@@ -76,7 +76,7 @@ title.Parent = hubFrame
 local setBtn = createButton("SetPart", "Set Checkpoint", 40)
 local tpBtn = createButton("TPPart", "Tp to checkpoint", 90)
 local noclipBtn = createButton("Noclip", "❌Noclip", 140)
--- nút chỉnh speed ở dongf 129 --
+-- nút chỉnh speed ở dong ??? --
 local espBtn = createButton("ESP", "✅ESP", 240)
 local flyBtn = createButton("Fly", "Fly", 290)
 local infJumpBtn = createButton("InfJump", "❌Infinity Jump", 340)
@@ -126,6 +126,37 @@ rightBtn.TextSize = 14
 rightBtn.Parent = flyContainer
 
 -- [END CREATE FLY BUTTON]
+
+-- tp to player
+local tpNameBox = Instance.new("TextBox")
+tpNameBox.Size = UDim2.new(0.5, -5, 0, 35)
+tpNameBox.Position = UDim2.new(0.1, 0, 0, 390)
+tpNameBox.PlaceholderText = "name player..."
+tpNameBox.Text = ""
+tpNameBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+tpNameBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+tpNameBox.Font = Enum.Font.SourceSans
+tpNameBox.TextSize = 16
+tpNameBox.ClearTextOnFocus = false
+tpNameBox.Parent = scrollFrame
+local tpToPlayerBtn = Instance.new("TextButton")
+tpToPlayerBtn.Size = UDim2.new(0.3, 0, 0, 35)
+tpToPlayerBtn.Position = UDim2.new(0.6, 5, 0, 390)
+tpToPlayerBtn.Text = "TP Player"
+tpToPlayerBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+tpToPlayerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpToPlayerBtn.Font = Enum.Font.SourceSansBold
+tpToPlayerBtn.TextSize = 16
+tpToPlayerBtn.Parent = scrollFrame
+
+local function findPlayerByDisplayName(name)
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if string.lower(plr.DisplayName) == string.lower(name) then
+			return plr
+		end
+	end
+	return nil
+end
 
 local speedBox = Instance.new("TextBox")
 speedBox.Size = UDim2.new(0.5, -5, 0, 35)
@@ -574,6 +605,23 @@ infJumpBtn.MouseButton1Click:Connect(function()
 		if infJumpConnection then
 			infJumpConnection:Disconnect()
 		end
+	end
+end)
+
+tpToPlayerBtn.MouseButton1Click:Connect(function()
+	local targetName = tpNameBox.Text
+	local target = findPlayerByDisplayName(targetName)
+
+	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+		end
+	else
+		tpToPlayerBtn.Text = "fail to tp"
+		task.delay(2, function()
+			tpToPlayerBtn.Text = "TP Player"
+		end)
 	end
 end)
 
