@@ -10,12 +10,12 @@ gui.ResetOnSpawn = false
 gui.Name = "BatCanHub"
 
 -- keyGui
-local key = "PaxcanVeryyyNoob001"
+local key = "key021"
 local inputBox = Instance.new("TextBox")
 inputBox.Size = UDim2.new(0, 200, 0, 35)
 inputBox.Position = UDim2.new(0.5, -100, 0.5, -17)
 inputBox.AnchorPoint = Vector2.new(0.5, 0.5)
-inputBox.PlaceholderText = "Enter key...(key in discord)"
+inputBox.PlaceholderText = "Key is "key021" Enjoy:D"
 inputBox.Text = ""
 inputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
