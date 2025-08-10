@@ -9,32 +9,6 @@ local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.ResetOnSpawn = false
 gui.Name = "BatCanHub"
 
--- keyGui
-local key = "key021"
-local inputBox = Instance.new("TextBox")
-inputBox.Size = UDim2.new(0, 200, 0, 35)
-inputBox.Position = UDim2.new(0.5, -100, 0.5, -17)
-inputBox.AnchorPoint = Vector2.new(0.5, 0.5)
-inputBox.PlaceholderText = "Key is "key021" Enjoy:D"
-inputBox.Text = ""
-inputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-inputBox.Font = Enum.Font.SourceSansBold
-inputBox.TextSize = 16
-inputBox.ClearTextOnFocus = false
-inputBox.Parent = gui
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = inputBox.Position + UDim2.new(0, 100, 0, -22)
-closeBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-closeBtn.Text = "❌"
-closeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.Font = Enum.Font.SourceSansBold
-closeBtn.TextSize = 14
-closeBtn.ZIndex = 9999
-closeBtn.Parent = gui
-
 -- Nút mở/tắt hub
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 45, 0, 45)
@@ -43,69 +17,7 @@ toggleButton.Text = "BCB"
 toggleButton.ZIndex = 999999
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.Visible = false
-
-local applykey = Instance.new("TextButton")
-applykey.Size = UDim2.new(0, 100, 0, 30)
-applykey.Position = UDim2.new(0.5, -50, 0.5, 10)
-applykey.AnchorPoint = Vector2.new(0.5, 0)
-applykey.Text = "✅Sumbit Key"
-applykey.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-applykey.TextColor3 = Color3.new(1,1,1)
-applykey.Font = Enum.Font.SourceSansBold
-applykey.TextSize = 14
-applykey.ZIndex = 9999
-applykey.Parent = gui
-
-local discordBtn2 = Instance.new("TextButton")
-discordBtn2.Size = UDim2.new(0, 160, 0, 30)
-discordBtn2.Position = UDim2.new(0.5, -80, 0.5, 60)
-discordBtn2.AnchorPoint = Vector2.new(0.5, 0.5)
-discordBtn2.Text = "📋 Copy link Discord"
-discordBtn2.BackgroundColor3 = Color3.fromRGB(50, 120, 255)
-discordBtn2.TextColor3 = Color3.fromRGB(255, 255, 255)
-discordBtn2.Font = Enum.Font.SourceSansBold
-discordBtn2.TextSize = 14
-discordBtn2.ZIndex = 99999
-discordBtn2.Parent = gui
-
-discordBtn2.MouseButton1Click:Connect(function()
-	if setclipboard then
-		setclipboard("https://discord.gg/592AGgZHm7")
-		discordBtn2.Text = "✅ Copied!"
-		task.delay(2, function()
-			discordBtn2.Text = "📋 Copy link Discord"
-		end)
-	else
-		discordBtn2.Text = "⚠️ Đã xảy ra lỗi"
-		task.delay(2, function()
-			discordBtn2.Text = "📋 Copy link Discord"
-		end)
-	end
-end)
-
-
-applykey.MouseButton1Click:Connect(function()
-	if inputBox.Text == key then
-		toggleButton.Visible = true
-		inputBox:Destroy()
-		applykey:Destroy()
-		discordBtn2:Destroy()
-        closeBtn:Destroy()
-	else
-		applykey.Text = "❌ Key sai hoặc lỗi"
-		task.delay(2, function()
-			applykey.Text = "✅ Sumbit Key"
-		end)
-	end
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-	inputBox.Visible = false
-	applykey.Visible = false
-	discordBtn2.Visible = false
-	closeBtn.Visible = false
-end)
+toggleButton.Visible = true
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(1, 0)
