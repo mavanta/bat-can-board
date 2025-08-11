@@ -69,7 +69,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-title.Text = "🔥 Bát Can Board V2 🔥"
+title.Text = "🔥 Bát Can Board V2.1 🔥"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 18
@@ -79,10 +79,12 @@ title.Parent = hubFrame
 local setBtn = createButton("SetPart", "Set Checkpoint", 40)
 local tpBtn = createButton("TPPart", "Tp to checkpoint", 90)
 local noclipBtn = createButton("Noclip", "❌Noclip", 140)
--- nút chỉnh speed ở dong ??? --
+-- speed setting (190) --
 local espBtn = createButton("ESP", "✅ESP", 240)
 local flyBtn = createButton("Fly", "Fly", 290)
 local infJumpBtn = createButton("InfJump", "❌Infinity Jump", 340)
+-- tp player (390)
+local fixlagBtn = createButton("Fixlag", "Fix Lag, FPS boost", 440)
 
  --[FLY 3 BUTTON CREATE] --
  --[[[[]]
@@ -629,6 +631,25 @@ tpToPlayerBtn.MouseButton1Click:Connect(function()
 		end)
 	end
 end)
+
+-- hàm find all part fixlag
+local function optimize()
+	for _, obj in pairs(workspace:GetDescendants()) do
+
+		if obj:IsA("BasePart") then
+			obj.Material = Enum.Material.SmoothPlastic
+		end
+
+		if obj:IsA("Accessory") then
+			obj:Destroy()
+		end
+
+		if obj:IsA("Decal") or obj:IsA("Texture") then
+			obj:Destroy()
+		end
+	end
+end
+fixlagBtn.MouseButton1Click:Connect(optimize) -- kich hoat fixlag
 
 
 -- Dead Reset CHâracter
