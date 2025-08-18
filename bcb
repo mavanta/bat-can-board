@@ -1,8 +1,14 @@
-local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local uis = game:GetService("UserInputService")
 local CAS = game:GetService("ContextActionService")
 local rs = game:GetService("RunService")
+
+local Players = game:GetService("Players")
+local player = game.Players.LocalPlayer
+
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
 local oldGUI = player:FindFirstChild("PlayerGui"):FindFirstChild("BatCanHub")
 if oldGUI then oldGUI:Destroy() end
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
@@ -69,7 +75,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-title.Text = "🔥 Bát Can Board V2.1 🔥"
+title.Text = "🔥 Bát Can Board V2.5 🔥"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 18
@@ -85,6 +91,8 @@ local flyBtn = createButton("Fly", "Fly", 290)
 local infJumpBtn = createButton("InfJump", "❌Infinity Jump", 340)
 -- tp player (390)
 local fixlagBtn = createButton("Fixlag", "Fix Lag, FPS boost", 440)
+local rejoinBtn = createButton("Rejoin", "🔄Rejoin", 490)
+local hopBtn = createButton("HopServer", "🌐Hop Server", 540)
 
  --[FLY 3 BUTTON CREATE] --
  --[[[[]]
@@ -224,6 +232,8 @@ local connection
 local espEnabled = true
 local infJumpEnabled = false
 local infJumpConnection
+local autoHealEnabled = false
+local autoHealConnection
 
 -- Set Part
 setBtn.MouseButton1Click:Connect(function()
@@ -252,6 +262,29 @@ tpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- hop server --
+local function hopServer()
+	local servers = {}
+	local req = game:HttpGet(string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100", game.PlaceId))
+	local data = HttpService:JSONDecode(req)
+
+	for _, server in ipairs(data.data) do
+		if server.playing < server.maxPlayers and server.id ~= game.JobId then
+			table.insert(servers, server.id)
+		end
+	end
+
+	if #servers > 0 then
+		local randomServer = servers[math.random(1, #servers)]
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer, Players.LocalPlayer)
+	else
+		warn("Không tìm thấy server để hop.")
+	end
+end
+hopBtn.MouseButton1Click:Connect(function()
+	hopServer()
+end)
+
 -- Noclip
 noclipBtn.MouseButton1Click:Connect(function()
 	noclip = not noclip
@@ -273,6 +306,15 @@ noclipBtn.MouseButton1Click:Connect(function()
 		end
 		noclipBtn.Text = "❌Noclip"
 	end
+end)
+
+-- rejoin server --
+local function rejoin()
+	local code = "Rejoin" -- để bạn muốn đặt tên nút
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+end
+rejoinBtn.MouseButton1Click:Connect(function()
+	rejoin()
 end)
 
 -- ESP add --
@@ -640,17 +682,12 @@ local function optimize()
 			obj.Material = Enum.Material.SmoothPlastic
 		end
 
-		if obj:IsA("Accessory") then
-			obj:Destroy()
-		end
-
 		if obj:IsA("Decal") or obj:IsA("Texture") then
 			obj:Destroy()
 		end
 	end
 end
 fixlagBtn.MouseButton1Click:Connect(optimize) -- kich hoat fixlag
-
 
 -- Dead Reset CHâracter
 player.CharacterAdded:Connect(function(char)
@@ -677,6 +714,7 @@ player.CharacterAdded:Connect(function(char)
 		infJumpConnection:Disconnect()
 	end
 
+	-- auto heal dead event
 
 	if espEnabled then
 		for _, plr in pairs(game.Players:GetPlayers()) do
